@@ -1,0 +1,20 @@
+version: "2"
+
+services:
+  cognito:
+    image: humanmade/local-cognito
+    ports:
+      - "33670:3000"
+    networks:
+      - default
+    restart: unless-stopped
+  pinpoint:
+    image: humanmade/local-pinpoint
+    ports:
+      - "33671:3000"
+    networks:
+      - default
+    restart: unless-stopped
+
+networks:
+  default:
