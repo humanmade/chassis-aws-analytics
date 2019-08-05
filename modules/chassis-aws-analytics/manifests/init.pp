@@ -35,7 +35,7 @@ class chassis-aws-analytics (
 	docker_compose { '/home/vagrant/aws-analytics/docker-compose.yaml':
 		ensure  => $compose_file,
 		require => [
-			Class['docker'],
+			Class['docker::compose'],
 			File['/home/vagrant/aws-analytics/docker-compose.yaml'],
 		],
 	}
