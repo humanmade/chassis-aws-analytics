@@ -5,6 +5,11 @@ class chassis-aws-analytics (
 	# Install Docker
 	include 'docker'
 
+	# Install Docker Compose
+	class { 'docker::compose':
+		ensure => present,
+	}
+
 	if ( ! empty( $config[disabled_extensions] ) and 'humanmade/chassis-aws-analytics' in $config[disabled_extensions] ) {
 		$dir = absent
 		$compose_file = absent
@@ -23,14 +28,14 @@ class chassis-aws-analytics (
 		content => template('chassis-aws-analytics/docker-compose.yaml'),
 		require => [
 			File['/home/vagrant/aws-analytics'],
-		]
+		],
 	}
 
 	# Start the stack.
 	docker_compose { '/home/vagrant/aws-analytics/docker-compose.yaml':
 		ensure  => $compose_file,
 		require => [
-			Class['docker'],
+			Class['docker::compose'],
 			File['/home/vagrant/aws-analytics/docker-compose.yaml'],
 		],
 	}
