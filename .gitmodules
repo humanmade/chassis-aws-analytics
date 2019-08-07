@@ -1,3 +1,6 @@
-[submodule "modules/docker"]
-	path = modules/docker
-	url = https://github.com/puppetlabs/puppetlabs-docker.git
+[submodule "local-cognito"]
+	path = local-cognito
+	url = https://github.com/humanmade/local-cognito.git
+[submodule "local-pinpoint"]
+	path = local-pinpoint
+	url = https://github.com/humanmade/local-pinpoint.git

@@ -2,42 +2,67 @@ class chassis-aws-analytics (
 	$config
 ) {
 
-	# Install Docker
-	include 'docker'
+	# Allow override from config.yaml
+	$options = deep_merge($defaults, $config[aws-analytics])
 
-	# Install Docker Compose
-	class { 'docker::compose':
-		ensure => present,
-	}
-
-	if ( ! empty( $config[disabled_extensions] ) and 'humanmade/chassis-aws-analytics' in $config[disabled_extensions] ) {
-		$dir = absent
-		$compose_file = absent
+	# Allow disabling the extension
+	if ( !empty($config[disabled_extensions]) and 'humanmade/chassis-aws-analytics' in $config[disabled_extensions] ) {
+		$package = absent
+		$service = stopped
+		$active  = false
 	} else {
-		$dir = directory
-		$compose_file = present
+		$package = present
+		$service = running
+		$active  = true
 	}
 
-	# Add the docker-compose.yaml file.
-	file { '/home/vagrant/aws-analytics':
-		ensure => $dir,
-	}
-	file { '/home/vagrant/aws-analytics/docker-compose.yaml':
-		ensure  => $compose_file,
-		mode    => '0777',
-		content => template('chassis-aws-analytics/docker-compose.yaml'),
+	# Get template vars
+	$port    = $options[port]
+
+	# Install and start
+	exec { 'tachyon install':
+		command => '/usr/bin/npm install',
+		cwd     => '/vagrant/extensions/tachyon/server',
+		user    => 'vagrant',
+		unless  => '/usr/bin/test -d /vagrant/extensions/tachyon/server/node_modules/sharp',
 		require => [
-			File['/home/vagrant/aws-analytics'],
+			Package['nodejs'],
+			Exec['tachyon install aws-sdk'],
 		],
 	}
 
-	# Start the stack.
-	docker_compose { '/home/vagrant/aws-analytics/docker-compose.yaml':
-		ensure  => $compose_file,
-		require => [
-			Class['docker::compose'],
-			File['/home/vagrant/aws-analytics/docker-compose.yaml'],
+	exec { 'systemctl enable tachyon':
+		command     => '/bin/systemctl enable tachyon',
+		refreshonly => true,
+	}
+
+  # Create service file
+	file { '/lib/systemd/system/tachyon.service':
+		ensure  => file,
+		mode    => '0644',
+		content => template('tachyon/systemd.service.erb'),
+		notify  => [
+			Exec['systemctl-daemon-reload'],
+			Exec['systemctl enable tachyon'],
 		],
+	}
+
+	File['/lib/systemd/system/tachyon.service'] -> Service['tachyon']
+
+	service { 'tachyon':
+		ensure    => $service,
+		enable    => $active,
+		restart   => $active,
+		hasstatus => $active,
+		require   => Exec['tachyon install'],
+	}
+
+	# Configure nginx
+	file { "/etc/nginx/sites-available/${fqdn}.d/tachyon.nginx.conf":
+		ensure  => $package,
+		content => template('tachyon/nginx.conf.erb'),
+		notify  => Service['nginx'],
+		require => File["/etc/nginx/sites-available/${fqdn}.d"],
 	}
 
 }
