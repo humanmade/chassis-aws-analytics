@@ -11,6 +11,13 @@ class chassis-aws-analytics (
 		$active = true
 	}
 
+	# Endpoints store.
+	file { '/tmp/endpoints':
+		ensure => directory,
+		owner => 'www-data',
+		mode => '0755',
+	}
+
 	# Create a service resource.
 	define analytics_service (
 		$status = running,
