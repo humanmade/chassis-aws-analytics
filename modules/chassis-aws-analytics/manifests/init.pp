@@ -11,13 +11,6 @@ class chassis-aws-analytics (
 		$active = true
 	}
 
-	# Endpoints store.
-	file { '/tmp/endpoints':
-		ensure => directory,
-		owner => 'www-data',
-		mode => '0755',
-	}
-
 	$services = [ 'cognito', 'pinpoint' ]
 
 	# Create services.
