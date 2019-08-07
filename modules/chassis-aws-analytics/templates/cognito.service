@@ -1,0 +1,14 @@
+[Unit]
+Description=Cognito
+
+[Service]
+TimeoutStartSec=0
+TimeoutStopSec=600
+Restart=always
+RestartSec=5s
+WorkingDirectory=/vagrant/extensions/chassis-aws-analytics/local-cognito/
+User=www-data
+ExecStart=/vagrant/extensions/chassis-aws-analytics/local-cognito/node_modules/.bin/micro -l tcp://0.0.0.0:33670
+
+[Install]
+WantedBy=vagrant.mount

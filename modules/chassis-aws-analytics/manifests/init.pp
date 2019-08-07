@@ -2,67 +2,65 @@ class chassis-aws-analytics (
 	$config
 ) {
 
-	# Allow override from config.yaml
-	$options = deep_merge($defaults, $config[aws-analytics])
-
 	# Allow disabling the extension
 	if ( !empty($config[disabled_extensions]) and 'humanmade/chassis-aws-analytics' in $config[disabled_extensions] ) {
-		$package = absent
-		$service = stopped
-		$active  = false
+		$status = stopped
+		$active = false
 	} else {
-		$package = present
-		$service = running
-		$active  = true
+		$status = running
+		$active = true
 	}
 
-	# Get template vars
-	$port    = $options[port]
+	# Create a service resource.
+	define analytics_service (
+		$status = running,
+		$active = true
+	) {
+		# Install.
+		exec { "${name} install":
+			command => '/usr/bin/npm install --production',
+			cwd     => "/vagrant/extensions/chassis-aws-analytics/local-${name}",
+			user    => 'vagrant',
+			unless  => "/usr/bin/test -d /vagrant/extensions/chassis-aws-analytics/local-${name}/node_modules",
+			require => [
+				Package['nodejs'],
+			],
+		}
 
-	# Install and start
-	exec { 'tachyon install':
-		command => '/usr/bin/npm install',
-		cwd     => '/vagrant/extensions/tachyon/server',
-		user    => 'vagrant',
-		unless  => '/usr/bin/test -d /vagrant/extensions/tachyon/server/node_modules/sharp',
-		require => [
-			Package['nodejs'],
-			Exec['tachyon install aws-sdk'],
-		],
+		# Enable the service.
+		exec { "systemctl enable ${name}":
+			command     => "/bin/systemctl enable ${name}",
+			refreshonly => true,
+		}
+
+		# Create service file.
+		file { "/lib/systemd/system/${name}.service":
+			ensure  => file,
+			mode    => '0644',
+			content => template("chassis-aws-analytics/${name}.service"),
+			notify  => [
+				Exec["systemctl enable ${name}"],
+				Exec['systemctl-daemon-reload'],
+			],
+		}
+
+		# Run the service.
+		service { $name:
+			ensure    => $status,
+			enable    => $active,
+			restart   => $active,
+			hasstatus => $active,
+			require   => Exec["${name} install"],
+			subscribe => File["/lib/systemd/system/${name}.service"],
+		}
 	}
 
-	exec { 'systemctl enable tachyon':
-		command     => '/bin/systemctl enable tachyon',
-		refreshonly => true,
-	}
+	$services = [ 'cognito', 'pinpoint' ]
 
-  # Create service file
-	file { '/lib/systemd/system/tachyon.service':
-		ensure  => file,
-		mode    => '0644',
-		content => template('tachyon/systemd.service.erb'),
-		notify  => [
-			Exec['systemctl-daemon-reload'],
-			Exec['systemctl enable tachyon'],
-		],
-	}
-
-	File['/lib/systemd/system/tachyon.service'] -> Service['tachyon']
-
-	service { 'tachyon':
-		ensure    => $service,
-		enable    => $active,
-		restart   => $active,
-		hasstatus => $active,
-		require   => Exec['tachyon install'],
-	}
-
-	# Configure nginx
-	file { "/etc/nginx/sites-available/${fqdn}.d/tachyon.nginx.conf":
-		ensure  => $package,
-		content => template('tachyon/nginx.conf.erb'),
-		notify  => Service['nginx'],
-		require => File["/etc/nginx/sites-available/${fqdn}.d"],
+	# Create services.
+	analytics_service { $services:
+		status => $status,
+		active => $active,
 	}
 
 }
