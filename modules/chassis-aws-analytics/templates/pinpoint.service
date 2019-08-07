@@ -8,7 +8,7 @@ Restart=always
 RestartSec=5s
 WorkingDirectory=/vagrant/extensions/chassis-aws-analytics/local-pinpoint/
 User=www-data
-Environment="ELASTICSEARCH_HOST=http://127.0.0.0:9200"
+Environment="ELASTICSEARCH_HOST=http://127.0.0.1:9200"
 ExecStart=/vagrant/extensions/chassis-aws-analytics/local-pinpoint/node_modules/.bin/micro -l tcp://0.0.0.0:33671
 
 [Install]
