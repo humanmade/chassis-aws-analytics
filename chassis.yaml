@@ -7,4 +7,5 @@
 version: 2
 
 dependencies:
-  - chassis-elasticsearch
+  - chassis/nodejs
+  - chassis/chassis-elasticsearch
