@@ -8,4 +8,4 @@ version: 2
 
 dependencies:
   - chassis/nodejs
-  - chassis/chassis-elasticsearch
+  - chassis/chassis_elasticsearch
