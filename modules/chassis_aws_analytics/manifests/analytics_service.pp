@@ -6,9 +6,9 @@ define analytics_service (
 	# Install.
 	exec { "${service} install":
 		command => '/usr/bin/npm install --production',
-		cwd     => "/vagrant/extensions/chassis-aws-analytics/local-${service}",
+		cwd     => "/vagrant/extensions/chassis_aws_analytics/local-${service}",
 		user    => 'vagrant',
-		unless  => "/usr/bin/test -d /vagrant/extensions/chassis-aws-analytics/local-${service}/node_modules",
+		unless  => "/usr/bin/test -d /vagrant/extensions/chassis_aws_analytics/local-${service}/node_modules",
 		require => [
 			Package['nodejs'],
 		],
@@ -24,7 +24,7 @@ define analytics_service (
 	file { "/lib/systemd/system/${service}.service":
 		ensure  => file,
 		mode    => '0644',
-		content => template("chassis-aws-analytics/${service}.service"),
+		content => template("chassis_aws_analytics/${service}.service"),
 		notify  => [
 			Exec["systemctl enable ${service}"],
 			Exec['systemctl-daemon-reload'],
