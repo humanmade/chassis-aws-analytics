@@ -3,7 +3,7 @@
  * Local AWS Analytics.
  */
 
-$scheme = $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+$scheme = array_key_exists( 'HTTPS', $_SERVER ) && ( $_SERVER['HTTPS'] === 'on' ) ? 'https' : 'http';
 
 define( 'ALTIS_ANALYTICS_ELASTICSEARCH_URL', 'http://127.0.0.1:9200' );
 
