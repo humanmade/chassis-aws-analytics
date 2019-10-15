@@ -5,12 +5,13 @@ define analytics_service (
 ) {
 	# Install.
 	exec { "${service} install":
-		command => '/usr/bin/npm install --production',
+		command => '/usr/bin/yarn --production',
 		cwd     => "/vagrant/extensions/chassis_aws_analytics/local-${service}",
 		user    => 'vagrant',
 		unless  => "/usr/bin/test -d /vagrant/extensions/chassis_aws_analytics/local-${service}/node_modules",
 		require => [
 			Package['nodejs'],
+			Exec['install yarn'],
 		],
 	}
 

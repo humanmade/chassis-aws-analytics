@@ -1,0 +1,44 @@
+# Cognito & Pinpoint don't properly support subdirectory
+# endpoint paths. To make sure analytics works with the openssl
+# extension we rewrite requests to the root URL that have
+# the appropriate headers for AWS requests.
+
+# Determine if this is a cognito or pinpoint request.
+set $is_cognito 0;
+set $is_pinpoint 0;
+
+# Check we're not already redirected.
+if ( $request_uri !~* ^/cognito ) {
+    set $is_cognito "${is_cognito}1";
+}
+if ( $request_uri !~* ^/pinpoint ) {
+    set $is_pinpoint "${is_pinpoint}1";
+}
+
+# Check the authorization header is for cognito or pinpoint.
+if ( $http_authorization ~* "cognito" ) {
+    set $is_cognito "${is_cognito}1";
+}
+if ( $http_authorization ~* "mobiletargeting" ) {
+    set $is_pinpoint "${is_pinpoint}1";
+}
+
+# Rewrite to the appropriate location blocks.
+if ( $is_cognito = "011" ) {
+    rewrite ^(.*) /ccognito$1;
+}
+if ( $is_pinpoint = "011" ) {
+    rewrite ^(.*) /pinpoint$1;
+}
+
+location /cognito/ {
+    proxy_pass http://0.0.0.0:33670/;
+    proxy_ssl_verify off;
+    proxy_buffering off;
+}
+
+location /pinpoint/ {
+    proxy_pass http://0.0.0.0:33671/;
+    proxy_ssl_verify off;
+    proxy_buffering off;
+}

@@ -12,5 +12,5 @@ define( 'ALTIS_ANALYTICS_PINPOINT_REGION', 'us-east-1' );
 define( 'ALTIS_ANALYTICS_COGNITO_ID', '12345678901234567890abc' );
 define( 'ALTIS_ANALYTICS_COGNITO_REGION', 'us-east-1' );
 
-define( 'ALTIS_ANALYTICS_PINPOINT_ENDPOINT', $scheme . '://' . $_SERVER['HTTP_HOST'] . ':33671' );
-define( 'ALTIS_ANALYTICS_COGNITO_ENDPOINT', $scheme . '://' . $_SERVER['HTTP_HOST'] . ':33670' );
+define( 'ALTIS_ANALYTICS_PINPOINT_ENDPOINT', $scheme . '://' . $_SERVER['HTTP_HOST'] . '/' );
+define( 'ALTIS_ANALYTICS_COGNITO_ENDPOINT', $scheme . '://' . $_SERVER['HTTP_HOST'] . '/' );
