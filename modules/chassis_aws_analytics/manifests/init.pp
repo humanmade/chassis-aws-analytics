@@ -14,7 +14,7 @@ class chassis_aws_analytics (
 	}
 
 	# Create services.
-	analytics_service { [ 'cognito', 'pinpoint' ]:
+	chassis_aws_analytics::analytics_service { [ 'cognito', 'pinpoint' ]:
 		status => $status,
 		active => $active,
 	}

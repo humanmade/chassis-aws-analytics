@@ -1,4 +1,4 @@
-define analytics_service (
+define chassis_aws_analytics::analytics_service (
 	$service = $name,
 	$status = running,
 	$active = true
